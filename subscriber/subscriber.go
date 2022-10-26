@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -63,7 +64,33 @@ func main() {
 	)
 	failOnError(err, "Failed to register a consumer")
 
+	//table
+	isTableFull := false
+	tableSeatsAvailable := 5
 	for msg := range msgs {
-		fmt.Println(msg)
+		// when table reaches size 5
+		// for loop should be blocked while people are eating sushi
+		customerId := string(msg.Body)
+		fmt.Printf("Customer %s arrived\n", customerId)
+		fmt.Printf("Customer %s waiting\n", customerId)
+		for isTableFull {
+		}
+
+		if tableSeatsAvailable > 0 {
+			fmt.Printf("Customer %s sitting\n", customerId)
+			tableSeatsAvailable--
+		}
+
+		if tableSeatsAvailable == 0 {
+			isTableFull = true
+			go eating(&isTableFull, &tableSeatsAvailable)
+		}
 	}
+}
+
+func eating(isTableFull *bool, tableSeatsAvailable *int) {
+	fmt.Println("Five friends eating sushi")
+	time.Sleep(time.Second * 5)
+	*isTableFull = false
+	*tableSeatsAvailable = 5
 }
