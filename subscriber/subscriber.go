@@ -64,12 +64,9 @@ func main() {
 	)
 	failOnError(err, "Failed to register a consumer")
 
-	//table
 	isTableFull := false
 	tableSeatsAvailable := 5
 	for msg := range msgs {
-		// when table reaches size 5
-		// for loop should be blocked while people are eating sushi
 		customerId := string(msg.Body)
 		fmt.Printf("Customer %s arrived\n", customerId)
 		fmt.Printf("Customer %s waiting\n", customerId)
