@@ -83,12 +83,12 @@ func main() {
 
 		if tableSeatsAvailable == 0 {
 			isTableFull = true
-			go eating(&isTableFull, &tableSeatsAvailable)
+			go friendsEating(&isTableFull, &tableSeatsAvailable)
 		}
 	}
 }
 
-func eating(isTableFull *bool, tableSeatsAvailable *int) {
+func friendsEating(isTableFull *bool, tableSeatsAvailable *int) {
 	fmt.Println("Five friends eating sushi")
 	time.Sleep(time.Second * 5)
 	*isTableFull = false
