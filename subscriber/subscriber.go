@@ -1,12 +1,8 @@
 package main
 
 import (
-	"encoding/csv"
 	"fmt"
 	"log"
-	"os"
-	"strconv"
-	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -25,11 +21,6 @@ func main() {
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
-
-	prefetchCount, err := strconv.Atoi(os.Args[1])
-	failOnError(err, "Failed to get prefetchCount")
-
-	ch.Qos(prefetchCount, 0, false)
 
 	err = ch.ExchangeDeclare(
 		"bytes",  // name
@@ -64,7 +55,7 @@ func main() {
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
-		false,  // auto-ack
+		true,   // auto-ack
 		false,  // exclusive
 		false,  // no-local
 		false,  // no-wait
@@ -72,21 +63,7 @@ func main() {
 	)
 	failOnError(err, "Failed to register a consumer")
 
-	csvFile, err := os.Create("execs.csv")
-	csvwriter := csv.NewWriter(csvFile)
-	csvwriter.Write([]string{"Bytes", "ExecTime"})
-	msgCounter := 0
 	for msg := range msgs {
-		err = msg.Ack(false)
-		msgCounter++
-		failOnError(err, "Failed to ack")
-		arrivalTime := time.Now().UnixNano()
-		failOnError(err, "Failed to receive a message")
-		err = csvwriter.Write([]string{fmt.Sprintf("%d", len(msg.Body)), fmt.Sprintf("%d", arrivalTime-msg.Timestamp.UnixNano())})
-		if msgCounter%100 == 0 {
-			csvwriter.Flush()
-		}
-		failOnError(err, "Could not write to csv")
+		fmt.Println(msg)
 	}
-	csvFile.Close()
 }
