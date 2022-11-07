@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -26,6 +27,17 @@ func main() {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
+
+
+	repliesConsumer, err := kafka.NewConsumer(&kafka.ConfigMap{
+		"bootstrap.servers": "localhost",
+		"auto.offset.reset": "earliest",
+	})
+	if err != nil {
+		fmt.Printf("Failed to create consumer: %s", err)
+	}
+	defer repliesConsumer.Close()
+
 
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
